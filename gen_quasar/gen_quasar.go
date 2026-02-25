@@ -144,6 +144,9 @@ type EntityView struct {
 	HasPivot         bool // M2M array-of-ID fields present
 	HasNestedObjects bool // Embedded object/JSON fields present
 	Operations       []OperationInfo
+	CreateSchema     string
+	UpdateSchema     string
+	ZodImportPath    string
 }
 
 type ColumnView struct {
@@ -397,6 +400,28 @@ func buildEntityView(meta *TableMetadata, apiBase string) EntityView {
 		NamePluralHuman: toHuman(plural),
 		APIBasePath:     apiBase + "/" + toKebab(plural),
 		Operations:      meta.Operations,
+	}
+
+	// Heuristic: Link Zod schemas from OpenAPI operations
+	for _, op := range meta.Operations {
+		// POST to collection is usually Create
+		if op.Method == "POST" && ev.CreateSchema == "" {
+			if op.RequestSchema != "" {
+				ev.CreateSchema = toCamel(op.RequestSchema) + "Schema"
+				if ev.ZodImportPath == "" && len(op.Tags) > 0 {
+					ev.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+				}
+			}
+		}
+		// PUT/PATCH to item is usually Update
+		if (op.Method == "PUT" || op.Method == "PATCH") && ev.UpdateSchema == "" {
+			if op.RequestSchema != "" {
+				ev.UpdateSchema = toCamel(op.RequestSchema) + "Schema"
+				if ev.ZodImportPath == "" && len(op.Tags) > 0 {
+					ev.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+				}
+			}
+		}
 	}
 
 	allCols := make([]ColumnView, 0, len(meta.Columns))

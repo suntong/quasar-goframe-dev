@@ -14,7 +14,7 @@
               autogrow
               dense
               hint="JSON format"
-              :rules="[[ .QuasarRules ]]"
+              :rules="rules.[[ .JSONName ]]"
               class="q-pa-sm"
             />
           </q-expansion-item>
@@ -23,7 +23,7 @@
             label="[[ .Label ]]"
             type="textarea"
             autogrow
-            :rules="[[ .QuasarRules ]]"
+            :rules="rules.[[ .JSONName ]]"
           />
 [[ else if eq .TSType "boolean" ]]          <q-toggle
             v-model="form.[[ .JSONName ]]"
@@ -35,7 +35,7 @@
             :options="[[ .EnumOptions ]]"
             emit-value
             map-options
-            :rules="[[ .QuasarRules ]]"
+            :rules="rules.[[ .JSONName ]]"
           />
 [[ else if .IsRelation ]]          <q-select
             v-model="form.[[ .JSONName ]]"
@@ -45,7 +45,7 @@
             map-options
             :options="relationOpts.[[ .JSONName ]]"
             @filter="(val: string, update: any) => filterRelation(val, update, '[[ .JSONName ]]', '[[ .RelationAPIPath ]]')"
-            :rules="[[ .QuasarRules ]]"
+            :rules="rules.[[ .JSONName ]]"
           />
 [[ else if .IsPivot ]]          <PivotSelect
             v-model="form.[[ .JSONName ]]"
@@ -92,7 +92,7 @@
             v-model="form.[[ .JSONName ]]"
             label="[[ .Label ]]"[[ if ne .InputType "text" ]]
             type="[[ .InputType ]]"[[ end ]]
-            :rules="[[ .QuasarRules ]]"
+            :rules="rules.[[ .JSONName ]]"
           />
 [[ end ]][[ end ]]        </q-form>
       </q-card-section>
@@ -109,6 +109,12 @@
 import { ref, reactive, computed, watch } from 'vue';
 import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
 import { fetchRelationOptions } from '../../api/client';
+import { zodFormRules } from '../../utils/zod-to-quasar';
+[[ if .ZodImportPath ]][[ if or .CreateSchema .UpdateSchema ]]import {
+  [[ if .CreateSchema ]][[ .CreateSchema ]],[[ end ]]
+  [[ if .UpdateSchema ]][[ if ne .UpdateSchema .CreateSchema ]][[ .UpdateSchema ]],[[ end ]][[ end ]]
+} from '[[ .ZodImportPath ]]';
+[[ end ]][[ end ]]
 [[ if .HasPivot ]]import PivotSelect from '../../components/PivotSelect.vue';
 [[ end ]]
 const props = defineProps<{
@@ -125,6 +131,14 @@ const formRef = ref<any>(null);
 const saving = ref(false);
 
 const isEdit = computed(() => props.item !== null);
+
+const rules = computed(() => {
+[[ if .ZodImportPath ]]  const schema = isEdit.value ? [[ if .UpdateSchema ]][[ .UpdateSchema ]][[ else ]]null[[ end ]] : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]];
+  if (schema) return zodFormRules(schema as any);
+[[ end ]]  return {
+[[ range .FormFields ]]    [[ .JSONName ]]: [[ .QuasarRules ]],
+[[ end ]]  };
+});
 
 const emptyForm: Record<string, any> = {
 [[ range .FormFields ]]  [[ .JSONName ]]: [[ if .IsPivot ]][][[ else if .IsNestedObject ]]'{}' [[ else if eq .TSType "number" ]]0[[ else if eq .TSType "boolean" ]]false[[ else ]]''[[ end ]],
