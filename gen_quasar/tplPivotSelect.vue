@@ -11,6 +11,7 @@
     map-options
     :loading="loading"
     @filter="onFilter"
+    :rules="rules"
   >
     <template #no-option>
       <q-item>
@@ -41,6 +42,7 @@ const props = defineProps<{
   apiPath: string;
   labelField?: string;
   valueField?: string;
+  rules?: any[];
 }>();
 
 defineEmits<{

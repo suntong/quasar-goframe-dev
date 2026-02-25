@@ -35,6 +35,7 @@
               :key="col.name"
               v-model="form[col.name]"
               :label="col.label"
+              :rules="rules[col.name]"
               dense
             />
           </q-form>
@@ -59,6 +60,7 @@ const props = defineProps<{
   apiPath: string;
   fkField: string;
   fkValue: string | number;
+  rules?: Record<string, any[]>;
 }>();
 
 const $q = useQuasar();
@@ -101,6 +103,8 @@ const tableColumns = computed(() => {
 const editableColumns = computed(() =>
   tableColumns.value.filter((c) => c.name !== 'id' && c.name !== '_actions' && c.name !== props.fkField)
 );
+
+const rules = computed(() => props.rules || {});
 
 const dialogOpen = ref(false);
 const editItem = ref<any>(null);

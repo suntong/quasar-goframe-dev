@@ -51,6 +51,7 @@
             v-model="form.[[ .JSONName ]]"
             label="[[ .Label ]]"
             api-path="[[ .RelationAPIPath ]]"
+            :rules="rules.[[ .JSONName ]]"
           />
 [[ else if .IsFile ]]          <div class="q-mb-sm">
             <q-uploader
@@ -133,11 +134,14 @@ const saving = ref(false);
 const isEdit = computed(() => props.item !== null);
 
 const rules = computed(() => {
-[[ if .ZodImportPath ]]  const schema = isEdit.value ? [[ if .UpdateSchema ]][[ .UpdateSchema ]][[ else ]]null[[ end ]] : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]];
-  if (schema) return zodFormRules(schema as any);
-[[ end ]]  return {
+  const manualRules = {
 [[ range .FormFields ]]    [[ .JSONName ]]: [[ .QuasarRules ]],
 [[ end ]]  };
+[[ if .ZodImportPath ]]  const schema = isEdit.value ? [[ if .UpdateSchema ]][[ .UpdateSchema ]][[ else ]]null[[ end ]] : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]];
+  if (schema) {
+    return { ...manualRules, ...zodFormRules(schema as any) };
+  }
+[[ end ]]  return manualRules;
 });
 
 const emptyForm: Record<string, any> = {

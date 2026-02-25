@@ -191,6 +191,9 @@ type RelationView struct {
 	SourceKey         string
 	IsCollection      bool
 	Description       string
+	TargetCreateSchema string
+	TargetUpdateSchema string
+	ZodImportPath      string
 }
 
 // ======================== Template Constants — Global ========================
@@ -279,7 +282,7 @@ func main() {
 		if len(meta.Columns) == 0 && len(meta.Relations) == 0 {
 			continue
 		}
-		entities = append(entities, buildEntityView(meta, *apiBase))
+		entities = append(entities, buildEntityView(meta, *apiBase, schema))
 	}
 
 	sort.Slice(entities, func(i, j int) bool { return entities[i].Name < entities[j].Name })
@@ -384,7 +387,7 @@ func loadSchema(path string) (*ConsolidatedSchema, error) {
 
 // ======================== View Model Builders ========================
 
-func buildEntityView(meta *TableMetadata, apiBase string) EntityView {
+func buildEntityView(meta *TableMetadata, apiBase string, schema *ConsolidatedSchema) EntityView {
 	name := toPascal(meta.NormalizedName)
 	plural := toPlural(name)
 
@@ -463,7 +466,7 @@ func buildEntityView(meta *TableMetadata, apiBase string) EntityView {
 	}
 
 	for _, rel := range meta.Relations {
-		rv := buildRelationView(rel, apiBase)
+		rv := buildRelationView(rel, apiBase, schema)
 		if rel.IsCollection {
 			ev.TableRelations = append(ev.TableRelations, rv)
 		} else {
@@ -655,10 +658,10 @@ func setRelationFields(cv *ColumnView, target, apiBase string) {
 	cv.RelationAPIPath = apiBase + "/" + toKebab(toPlural(target))
 }
 
-func buildRelationView(rel *RelationNode, apiBase string) RelationView {
+func buildRelationView(rel *RelationNode, apiBase string, schema *ConsolidatedSchema) RelationView {
 	target := normalizeEntityName(rel.TargetStruct)
 	plural := toPlural(toPascal(target))
-	return RelationView{
+	rv := RelationView{
 		FieldName:         rel.FieldName,
 		TargetEntity:      toPascal(target),
 		TargetLower:       toCamel(target),
@@ -671,6 +674,43 @@ func buildRelationView(rel *RelationNode, apiBase string) RelationView {
 		IsCollection:      rel.IsCollection,
 		Description:       rel.Description,
 	}
+
+	// Heuristic: Link Zod schemas from target entity's operations
+	var targetMeta *TableMetadata
+	normTarget := normalizeEntityName(target)
+	// Find target in entity_list or entities map
+	for _, m := range schema.EntityList {
+		if m.NormalizedName == normTarget {
+			targetMeta = m
+			break
+		}
+	}
+	if targetMeta == nil {
+		targetMeta = schema.Entities[rel.TargetStruct]
+	}
+
+	if targetMeta != nil {
+		for _, op := range targetMeta.Operations {
+			if op.Method == "POST" && rv.TargetCreateSchema == "" {
+				if op.RequestSchema != "" {
+					rv.TargetCreateSchema = toCamel(op.RequestSchema) + "Schema"
+					if rv.ZodImportPath == "" && len(op.Tags) > 0 {
+						rv.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+					}
+				}
+			}
+			if (op.Method == "PUT" || op.Method == "PATCH") && rv.TargetUpdateSchema == "" {
+				if op.RequestSchema != "" {
+					rv.TargetUpdateSchema = toCamel(op.RequestSchema) + "Schema"
+					if rv.ZodImportPath == "" && len(op.Tags) > 0 {
+						rv.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+					}
+				}
+			}
+		}
+	}
+
+	return rv
 }
 
 // ======================== Detection Helpers ========================
