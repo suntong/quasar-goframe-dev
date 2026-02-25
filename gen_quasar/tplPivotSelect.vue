@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import api, { unwrap } from '../api/client';
+import { api, unwrap } from '../api/client';
 
 const props = defineProps<{
   modelValue: any[];

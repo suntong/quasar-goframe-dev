@@ -1,7 +1,8 @@
 // Auto-generated API client — do not edit manually.
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig } from 'axios';
 
-const api = axios.create({
+// Named export: raw axios instance for hand-written composables and utilities
+export const api = axios.create({
   baseURL: '[[ .APIBaseURL ]]',
   headers: { 'Content-Type': 'application/json' },
 });
@@ -13,10 +14,13 @@ export interface GFResponse<T = any> {
   data: T;
 }
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  if (token && config.headers) {
-    config.headers.Authorization = 'Bearer ' + token;
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // Check if we are in a browser environment to prevent SSR crashes
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('auth_token');
+    if (token && config.headers) {
+      config.headers.Authorization = 'Bearer ' + token;
+    }
   }
   return config;
 });
@@ -30,7 +34,7 @@ api.interceptors.response.use(
   }
 );
 
-// Unwrap GoFrame envelope and return the data payload
+// Unwrap GoFrame envelope — used by hand-written composables
 export function unwrap<T>(response: { data: GFResponse<T> }): T {
   const gf = response.data;
   if (gf.code !== 0) {
@@ -55,4 +59,17 @@ export async function fetchRelationOptions(
   }));
 }
 
-export default api;
+// Orval custom mutator: receives a single config object, returns Promise<T>.
+// Unwraps the GoFrame envelope so Orval-generated types match the inner data shape.
+const customInstance = <T>(config: {
+  url: string;
+  method: string;
+  data?: any;
+  params?: any;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}): Promise<T> => {
+  return api(config).then((response) => unwrap<T>(response));
+};
+
+export default customInstance;

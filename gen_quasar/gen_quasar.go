@@ -214,11 +214,13 @@ var tplOrvalConfig string
 
 // SubTableCrud provides embedded 1:N relation CRUD inside any detail page.
 // Dynamic columns are derived from response data, so no schema lookup is needed.
+//
 //go:embed tplSubTableCrud.vue
 var tplSubTableCrud string
 
 // PivotSelect provides a chip-based multi-select for M2M relationships.
 // Options are fetched from the target entity endpoint with type-ahead filtering.
+//
 //go:embed tplPivotSelect.vue
 var tplPivotSelect string
 
@@ -296,18 +298,18 @@ func main() {
 	templates := template.New("root").Delims("[[", "]]").Funcs(funcMap)
 
 	tplDefs := map[string]string{
-		"api-client":      tplAPIClient,
-		"router":          tplRouter,
-		"validation":      tplValidation,
-		"hydra":           tplHydra,
-		"zod-bridge":      tplZodBridge,
-		"orval":           tplOrvalConfig,
-		"sub-table-crud":  tplSubTableCrud,
-		"pivot-select":    tplPivotSelect,
-		"index-page":      tplIndexPage,
-		"form-dialog":     tplFormDialog,
-		"detail-page":     tplDetailPage,
-		"composable":      tplComposable,
+		"api-client":     tplAPIClient,
+		"router":         tplRouter,
+		"validation":     tplValidation,
+		"hydra":          tplHydra,
+		"zod-bridge":     tplZodBridge,
+		"orval":          tplOrvalConfig,
+		"sub-table-crud": tplSubTableCrud,
+		"pivot-select":   tplPivotSelect,
+		"index-page":     tplIndexPage,
+		"form-dialog":    tplFormDialog,
+		"detail-page":    tplDetailPage,
+		"composable":     tplComposable,
 	}
 	for name, content := range tplDefs {
 		if _, err := templates.New(name).Parse(content); err != nil {
@@ -456,7 +458,7 @@ func buildEntityView(meta *TableMetadata, apiBase string) EntityView {
 func buildColumnView(col ColumnInfo, apiBase string) ColumnView {
 	jsonName := col.JSONName
 	if jsonName == "" {
-		jsonName = toCamel(col.Name)
+		jsonName = col.Name // Preserve GoFrame's actual field name
 	}
 
 	cv := ColumnView{
