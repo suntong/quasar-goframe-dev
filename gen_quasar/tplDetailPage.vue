@@ -50,7 +50,8 @@
       api-path="[[ .TargetAPIPath ]]"
       fk-field="[[ .TargetKey ]]"
       :fk-value="entityId"
-      :rules="[[ .FieldName ]]Rules"
+      :zod-create="[[ .FieldName ]]CreateSchema"
+      :zod-update="[[ .FieldName ]]UpdateSchema"
     />
 [[ end ]]
     <FormDialog v-model="editDialogOpen" :item="editItem" @saved="onEditSaved" />
@@ -64,9 +65,18 @@ import { useQuasar } from 'quasar';
 import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
 import FormDialog from './FormDialog.vue';
 import { zodFormRules } from '../../utils/zod-to-quasar';
-[[ if .TableRelations ]]import SubTableCrud from '../../components/SubTableCrud.vue';
-[[ range .TableRelations ]][[ if .ZodImportPath ]][[ if .TargetCreateSchema ]]import { [[ .TargetCreateSchema ]] } from '[[ .ZodImportPath ]]';
-[[ end ]][[ end ]][[ end ]][[ end ]]
+
+[[ if .TableRelations ]]
+import SubTableCrud from '../../components/SubTableCrud.vue'
+import { zodFormRules } from '../../utils/zod-to-quasar'
+[[ end ]]
+
+[[ range .TableRelations ]]
+  [[ if .ZodImportPath ]]
+    import { [[ .TargetCreateSchema ]][[ if ne .TargetUpdateSchema .TargetCreateSchema ]], [[ .TargetUpdateSchema ]][[ end ]] } from '[[ .ZodImportPath ]]'
+  [[ end ]]
+[[ end ]]
+
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
@@ -76,7 +86,9 @@ const { useItem, remove } = use[[ .Name ]]();
 const { data: itemData, isLoading } = useItem(entityId);
 const item = computed(() => itemData.value || null);
 
-[[ range .TableRelations ]]const [[ .FieldName ]]Rules = [[ if .TargetCreateSchema ]]zodFormRules([[ .TargetCreateSchema ]] as any)[[ else ]]{}[[ end ]];
+[[ range .TableRelations ]]
+const [[ .FieldName ]]CreateSchema = [[ if .TargetCreateSchema ]][[ .TargetCreateSchema ]][[ else ]]null[[ end ]]
+const [[ .FieldName ]]UpdateSchema = [[ if .TargetUpdateSchema ]][[ .TargetUpdateSchema ]][[ else ]][[ .FieldName ]]CreateSchema[[ end ]]
 [[ end ]]
 
 const editDialogOpen = ref(false);

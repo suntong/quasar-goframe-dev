@@ -180,17 +180,17 @@ type ColumnView struct {
 }
 
 type RelationView struct {
-	FieldName         string
-	TargetEntity      string
-	TargetLower       string
-	TargetKebab       string
-	TargetPlural      string
-	TargetPluralKebab string
-	TargetAPIPath     string // Full API path for fetching related items
-	TargetKey         string
-	SourceKey         string
-	IsCollection      bool
-	Description       string
+	FieldName          string
+	TargetEntity       string
+	TargetLower        string
+	TargetKebab        string
+	TargetPlural       string
+	TargetPluralKebab  string
+	TargetAPIPath      string // Full API path for fetching related items
+	TargetKey          string
+	SourceKey          string
+	IsCollection       bool
+	Description        string
 	TargetCreateSchema string
 	TargetUpdateSchema string
 	ZodImportPath      string
@@ -408,20 +408,26 @@ func buildEntityView(meta *TableMetadata, apiBase string, schema *ConsolidatedSc
 	// Heuristic: Link Zod schemas from OpenAPI operations
 	for _, op := range meta.Operations {
 		// POST to collection is usually Create
-		if op.Method == "POST" && ev.CreateSchema == "" {
+		if op.Method == "POST" && ev.CreateSchema == "" && len(op.Tags) > 0 {
 			if op.RequestSchema != "" {
-				ev.CreateSchema = toCamel(op.RequestSchema) + "Schema"
-				if ev.ZodImportPath == "" && len(op.Tags) > 0 {
-					ev.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+				tag := op.Tags[0]
+				pascalTag := toPascal(tag)
+				kebabTag := toKebab(tag)
+				ev.CreateSchema = "Post" + pascalTag + "Body"
+				if ev.ZodImportPath == "" {
+					ev.ZodImportPath = "../../api/gen/zod/" + kebabTag + "/" + kebabTag
 				}
 			}
 		}
 		// PUT/PATCH to item is usually Update
-		if (op.Method == "PUT" || op.Method == "PATCH") && ev.UpdateSchema == "" {
+		if (op.Method == "PUT" || op.Method == "PATCH") && ev.UpdateSchema == "" && len(op.Tags) > 0 {
 			if op.RequestSchema != "" {
-				ev.UpdateSchema = toCamel(op.RequestSchema) + "Schema"
-				if ev.ZodImportPath == "" && len(op.Tags) > 0 {
-					ev.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+				tag := op.Tags[0]
+				pascalTag := toPascal(tag)
+				kebabTag := toKebab(tag)
+				ev.UpdateSchema = strings.Title(op.Method) + pascalTag + "IdBody"
+				if ev.ZodImportPath == "" {
+					ev.ZodImportPath = "../../api/gen/zod/" + kebabTag + "/" + kebabTag
 				}
 			}
 		}
@@ -687,23 +693,27 @@ func buildRelationView(rel *RelationNode, apiBase string, schema *ConsolidatedSc
 	}
 	if targetMeta == nil {
 		targetMeta = schema.Entities[rel.TargetStruct]
-	}
-
-	if targetMeta != nil {
+	} else {
 		for _, op := range targetMeta.Operations {
-			if op.Method == "POST" && rv.TargetCreateSchema == "" {
+			if op.Method == "POST" && rv.TargetCreateSchema == "" && len(op.Tags) > 0 {
 				if op.RequestSchema != "" {
-					rv.TargetCreateSchema = toCamel(op.RequestSchema) + "Schema"
-					if rv.ZodImportPath == "" && len(op.Tags) > 0 {
-						rv.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+					tag := op.Tags[0]
+					pascalTag := toPascal(tag)
+					kebabTag := toKebab(tag)
+					rv.TargetCreateSchema = "Post" + pascalTag + "Body"
+					if rv.ZodImportPath == "" {
+						rv.ZodImportPath = "../../api/gen/zod/" + kebabTag + "/" + kebabTag
 					}
 				}
 			}
-			if (op.Method == "PUT" || op.Method == "PATCH") && rv.TargetUpdateSchema == "" {
+			if (op.Method == "PUT" || op.Method == "PATCH") && rv.TargetUpdateSchema == "" && len(op.Tags) > 0 {
 				if op.RequestSchema != "" {
-					rv.TargetUpdateSchema = toCamel(op.RequestSchema) + "Schema"
-					if rv.ZodImportPath == "" && len(op.Tags) > 0 {
-						rv.ZodImportPath = "../../api/gen/zod/" + toKebab(op.Tags[0])
+					tag := op.Tags[0]
+					pascalTag := toPascal(tag)
+					kebabTag := toKebab(tag)
+					rv.TargetUpdateSchema = strings.Title(op.Method) + pascalTag + "IdBody"
+					if rv.ZodImportPath == "" {
+						rv.ZodImportPath = "../../api/gen/zod/" + kebabTag + "/" + kebabTag
 					}
 				}
 			}

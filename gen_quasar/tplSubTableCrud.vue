@@ -35,7 +35,7 @@
               :key="col.name"
               v-model="form[col.name]"
               :label="col.label"
-              :rules="rules[col.name]"
+              :rules="rules.value[col.name] || []"
               dense
             />
           </q-form>
@@ -60,7 +60,8 @@ const props = defineProps<{
   apiPath: string;
   fkField: string;
   fkValue: string | number;
-  rules?: Record<string, any[]>;
+  zodCreate?: any;
+  zodUpdate?: any;
 }>();
 
 const $q = useQuasar();
@@ -104,7 +105,12 @@ const editableColumns = computed(() =>
   tableColumns.value.filter((c) => c.name !== 'id' && c.name !== '_actions' && c.name !== props.fkField)
 );
 
-const rules = computed(() => props.rules || {});
+const isEdit = computed(() => !!editItem.value?.id)
+const rules = computed(() => {
+  const schema = isEdit.value ? props.zodUpdate : props.zodCreate
+  if (!schema || typeof schema.shape !== 'object') return {}
+  return zodFormRules(schema as any)
+})
 
 const dialogOpen = ref(false);
 const editItem = ref<any>(null);
