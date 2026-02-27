@@ -180,8 +180,8 @@ function onRemove(row: any) {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    deleteItem(row.id);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    void deleteItem(row.id);
   });
 }
 </script>

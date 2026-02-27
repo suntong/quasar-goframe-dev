@@ -125,6 +125,7 @@ function onDelete() {
     cancel: true,
     persistent: true,
   }).onOk(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     void (async () => {
       await remove(entityId.value);
       // eslint-disable-next-line @typescript-eslint/no-floating-promises

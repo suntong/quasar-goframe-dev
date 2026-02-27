@@ -30,6 +30,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const msg = error.response?.data?.message || error.message;
     console.error('[API]', msg);
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
