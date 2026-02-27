@@ -1,5 +1,6 @@
 // Auto-generated validation utilities — do not edit manually.
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type QRule = (val: any) => true | string;
 
 export function required(label: string): QRule {

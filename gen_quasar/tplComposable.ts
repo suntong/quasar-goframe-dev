@@ -42,6 +42,7 @@ export function use[[ .Name ]]() {
           orderDirection: p.descending ? 'desc' : 'asc',
         },
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload = unwrap<any>(res);
       const list = Array.isArray(payload) ? payload : payload?.list || payload?.items || [];
       const total = payload?.total ?? payload?.totalCount ?? list.length;
@@ -62,6 +63,7 @@ export function use[[ .Name ]]() {
       queryFn: async () => {
         if (!id.value) return null;
         const res = await api.get(ENTITY_PATH + '/' + id.value);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return unwrap<any>(res);
       },
       enabled: computed(() => !!id.value),
@@ -69,17 +71,21 @@ export function use[[ .Name ]]() {
   }
 
   const { mutateAsync: create } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (data: any) => {
       const res = await api.post(ENTITY_PATH, data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return unwrap<any>(res);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
   });
 
   const { mutateAsync: update } = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (data: any) => {
       const { [[ .PrimaryKey ]]: id, ...body } = data;
       const res = await api.put(ENTITY_PATH + '/' + id, body);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return unwrap<any>(res);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),
@@ -88,6 +94,7 @@ export function use[[ .Name ]]() {
   const { mutateAsync: remove } = useMutation({
     mutationFn: async (id: string | number) => {
       const res = await api.delete(ENTITY_PATH + '/' + id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return unwrap<any>(res);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] }),

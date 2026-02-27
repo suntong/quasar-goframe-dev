@@ -64,10 +64,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
 import FormDialog from './FormDialog.vue';
-import { zodFormRules } from '../../utils/zod-to-quasar';
 
 [[ if .TableRelations ]]
 import SubTableCrud from '../../components/SubTableCrud.vue'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { zodFormRules } from '../../utils/zod-to-quasar'
 [[ end ]]
 
@@ -92,17 +92,24 @@ const [[ .FieldName ]]UpdateSchema = [[ if .TargetUpdateSchema ]][[ .TargetUpdat
 [[ end ]]
 
 const editDialogOpen = ref(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editItem = ref<any>(null);
 
+[[ if .HasNestedObjects ]]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatNested(val: any): string {
   if (val === null || val === undefined) return '';
   if (typeof val === 'object') return JSON.stringify(val, null, 2);
   return String(val);
 }
+[[ end ]]
 
-function isImageUrl(url: string): boolean {
+[[ if .HasFileUpload ]]
+function isImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
   return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(url);
 }
+[[ end ]]
 
 function onEdit() {
   editItem.value = item.value ? { ...item.value } : null;
@@ -119,9 +126,13 @@ function onDelete() {
     message: 'Delete this [[ .NameLower ]]?',
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
-    await remove(entityId.value);
-    router.push('/[[ .NamePluralKebab ]]');
+  }).onOk(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    void (async () => {
+      await remove(entityId.value);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      router.push('/[[ .NamePluralKebab ]]');
+    })();
   });
 }
 </script>
