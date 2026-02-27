@@ -108,20 +108,20 @@
 
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
-[[ if .HasFileUpload ]]import { useQuasar } from 'quasar'[[ end ]]
-import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]'
-[[ if .HasRelations ]]import { fetchRelationOptions } from '../../api/client'[[ end ]]
-[[ if .ZodImportPath ]]import { zodFormRules } from '../../utils/zod-to-quasar'[[ end ]]
+import { ref, reactive, computed, watch } from 'vue';
+[[ if .HasFileUpload ]]import { useQuasar } from 'quasar';[[ end ]]
+import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
+[[ if .HasRelations ]]import { fetchRelationOptions } from '../../api/client';[[ end ]]
+[[ if .ZodImportPath ]]import { zodFormRules } from '../../utils/zod-to-quasar';[[ end ]]
 
 [[ if .ZodImportPath ]]
   [[ if or .CreateSchema .UpdateSchema ]]
-    import { [[ if .CreateSchema ]][[ .CreateSchema ]][[ if ne .UpdateSchema .CreateSchema ]], [[ .UpdateSchema ]][[ end ]][[ else ]] [[ .UpdateSchema ]] [[ end ]] } from '[[ .ZodImportPath ]]'
+    import { [[ if .CreateSchema ]][[ .CreateSchema ]][[ if ne .UpdateSchema .CreateSchema ]], [[ .UpdateSchema ]][[ end ]][[ else ]] [[ .UpdateSchema ]] [[ end ]] } from '[[ .ZodImportPath ]]';
   [[ end ]]
 [[ end ]]
 
 [[ if .HasPivot ]]
-import PivotSelect from '../../components/PivotSelect.vue'
+import PivotSelect from '../../components/PivotSelect.vue';
 [[ end ]]
 
 const props = defineProps<{
@@ -130,40 +130,41 @@ const props = defineProps<{
   item: any | null;
 }>();
 
-const emit = defineEmits(['saved', 'cancel'])
+const emit = defineEmits(['saved', 'cancel']);
 
-[[ if .HasFileUpload ]]const $q = useQuasar()[[ end ]]
-const saving = ref(false)
+[[ if .HasFileUpload ]]const $q = useQuasar();[[ end ]]
+const saving = ref(false);
 
-const isEdit = computed(() => props.item !== null)
+const isEdit = computed(() => props.item !== null);
 
 const rules = computed(() => {
   const manualRules = {
     [[ range .FormFields ]]
     [[ .JSONName ]]: [[ .QuasarRules ]],
     [[ end ]]
-  }
+  };
 
   [[ if .ZodImportPath ]]
   const schema = isEdit.value
     ? [[ if .UpdateSchema ]][[ .UpdateSchema ]][[ else ]]null[[ end ]]
-    : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]]
+    : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (schema && typeof (schema as any).shape === 'object') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return { ...manualRules, ...zodFormRules(schema as any) }
+    return { ...manualRules, ...zodFormRules(schema as any) };
   }
   [[ end ]]
 
-  return manualRules
-})
+  return manualRules;
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const emptyForm: Record<string, any> = {
   [[ range .FormFields ]]
-  [[ .JSONName ]]: [[ if .IsPivot ]][][[ else if .IsNestedObject ]]'{}'[[ else if eq .TSType "number" ]]0[[ else if eq .TSType "boolean" ]]false[[ else ]]' '[[ end ]],
+  [[ .JSONName ]]: [[ if .IsPivot ]][][[ else if .IsNestedObject ]]'{}'[[ else if eq .TSType "number" ]]0[[ else if eq .TSType "boolean" ]]false[[ else ]]''[[ end ]],
   [[ end ]]
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const form = reactive<Record<string, any>>({ ...emptyForm });
