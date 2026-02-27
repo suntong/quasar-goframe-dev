@@ -6,7 +6,7 @@
 //
 import { ref, computed, type Ref } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import api, { unwrap } from '../api/client';
+import { api, unwrap } from '../api/client';
 
 const ENTITY_PATH = '[[ .APIBasePath ]]';
 const QUERY_KEY = '[[ .NamePluralLower ]]';

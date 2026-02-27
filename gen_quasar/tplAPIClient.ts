@@ -1,5 +1,6 @@
 // Auto-generated API client — do not edit manually.
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 
 // Named export: raw axios instance for hand-written composables and utilities
 export const api = axios.create({

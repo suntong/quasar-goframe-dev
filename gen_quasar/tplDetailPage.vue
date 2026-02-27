@@ -67,8 +67,6 @@ import FormDialog from './FormDialog.vue';
 
 [[ if .TableRelations ]]
 import SubTableCrud from '../../components/SubTableCrud.vue'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { zodFormRules } from '../../utils/zod-to-quasar'
 [[ end ]]
 
 [[ range .TableRelations ]]
