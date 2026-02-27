@@ -54,6 +54,7 @@ import { ref, computed } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useQuasar } from 'quasar';
 import { api, unwrap } from '../api/client';
+import { zodFormRules } from '../utils/zod-to-quasar';
 
 const props = defineProps<{
   title: string;

@@ -70,7 +70,6 @@ function onDelete(id: any) {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     void remove(id);
   });
 }

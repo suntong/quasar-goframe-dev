@@ -67,8 +67,6 @@ import FormDialog from './FormDialog.vue';
 
 [[ if .TableRelations ]]
 import SubTableCrud from '../../components/SubTableCrud.vue'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { zodFormRules } from '../../utils/zod-to-quasar'
 [[ end ]]
 
 [[ range .TableRelations ]]
@@ -127,7 +125,6 @@ function onDelete() {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     void (async () => {
       await remove(entityId.value);
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
