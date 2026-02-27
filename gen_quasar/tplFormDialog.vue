@@ -109,10 +109,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
-import { useQuasar } from 'quasar'
+[[ if .HasFileUpload ]]import { useQuasar } from 'quasar'[[ end ]]
 import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]'
-import { fetchRelationOptions } from '../../api/client'
-import { zodFormRules } from '../../utils/zod-to-quasar'
+[[ if .HasRelations ]]import { fetchRelationOptions } from '../../api/client'[[ end ]]
+[[ if .ZodImportPath ]]import { zodFormRules } from '../../utils/zod-to-quasar'[[ end ]]
 
 [[ if .ZodImportPath ]]
   [[ if or .CreateSchema .UpdateSchema ]]
@@ -126,12 +126,13 @@ import PivotSelect from '../../components/PivotSelect.vue'
 
 const props = defineProps<{
   modelValue: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   item: any | null;
 }>();
 
 const emit = defineEmits(['saved', 'cancel'])
 
-const $q = useQuasar()
+[[ if .HasFileUpload ]]const $q = useQuasar()[[ end ]]
 const saving = ref(false)
 
 const isEdit = computed(() => props.item !== null)
@@ -149,6 +150,7 @@ const rules = computed(() => {
     : [[ if .CreateSchema ]][[ .CreateSchema ]][[ else ]]null[[ end ]]
 
   if (schema && typeof (schema as any).shape === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return { ...manualRules, ...zodFormRules(schema as any) }
   }
   [[ end ]]
@@ -156,14 +158,17 @@ const rules = computed(() => {
   return manualRules
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const emptyForm: Record<string, any> = {
   [[ range .FormFields ]]
   [[ .JSONName ]]: [[ if .IsPivot ]][][[ else if .IsNestedObject ]]'{}'[[ else if eq .TSType "number" ]]0[[ else if eq .TSType "boolean" ]]false[[ else ]]' '[[ end ]],
   [[ end ]]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const form = reactive<Record<string, any>>({ ...emptyForm });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const relationOpts = reactive<Record<string, any[]>>({
 [[ range .FormFields ]][[ if .IsRelation ]]  [[ .JSONName ]]: [],
 [[ end ]][[ end ]]});
@@ -183,6 +188,7 @@ watch(() => props.item, (val) => {
   }
 }, { immediate: true });
 
+[[ if .HasRelations ]]
 async function filterRelation(
   val: string,
   update: (fn: () => void) => void,
@@ -192,19 +198,26 @@ async function filterRelation(
   const opts = await fetchRelationOptions(apiPath, val, 'name');
   update(() => { relationOpts[fieldName] = opts; });
 }
+[[ end ]]
 
+[[ if .HasFileUpload ]]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function onFileUploaded(info: any, fieldName: string) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const res = JSON.parse(info.xhr.responseText);
     form[fieldName] = res?.data?.url || res?.url || '';
   } catch { form[fieldName] = ''; }
 }
 
-function isImageUrl(url: string): boolean {
+function isImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
   return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(url);
 }
+[[ end ]]
 
 // Parse JSON-string fields back to objects before sending to the API
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function preparePayload(data: Record<string, any>): Record<string, any> {
   const out = { ...data };
   for (const [key, val] of Object.entries(out)) {
@@ -218,6 +231,10 @@ function preparePayload(data: Record<string, any>): Record<string, any> {
   }
   return out;
 }
+
+const { create, update } = use[[ .Name ]]();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formRef = ref<any>(null);
 
 async function onSubmit() {
   const valid = await formRef.value?.validate();

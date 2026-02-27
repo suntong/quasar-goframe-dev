@@ -8,8 +8,10 @@
 //
 import type { ZodObject, ZodTypeAny } from 'zod';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type QRule = (val: any) => true | string;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function zodFormRules<T extends ZodObject<any>>(
   schema: T
 ): Record<string, QRule[]> {
@@ -17,6 +19,7 @@ export function zodFormRules<T extends ZodObject<any>>(
   const shape = schema.shape as Record<string, ZodTypeAny>;
   for (const [field, fieldSchema] of Object.entries(shape)) {
     rules[field] = [
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (val: any) => {
         const result = fieldSchema.safeParse(val);
         if (result.success) return true;
@@ -27,6 +30,7 @@ export function zodFormRules<T extends ZodObject<any>>(
   return rules;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function zodFieldRules<T extends ZodObject<any>>(
   schema: T,
   field: keyof T['shape'] & string
@@ -34,6 +38,7 @@ export function zodFieldRules<T extends ZodObject<any>>(
   const fieldSchema = schema.shape[field] as ZodTypeAny | undefined;
   if (!fieldSchema) return [];
   return [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (val: any) => {
       const result = fieldSchema.safeParse(val);
       if (result.success) return true;

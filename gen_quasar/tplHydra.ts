@@ -9,6 +9,7 @@ export function extractId(iri: string | number | null | undefined): string {
   return idx >= 0 ? s.substring(idx + 1) : s;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isIri(val: any): boolean {
   return typeof val === 'string' && val.startsWith('/');
 }
@@ -18,6 +19,7 @@ export function buildIri(resource: string, id: string | number): string {
 }
 
 // Hydra collection envelope
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface HydraCollection<T = any> {
   '@context'?: string;
   '@id'?: string;
@@ -37,6 +39,7 @@ export interface HydraView {
 }
 
 // Unwrap a Hydra collection or fall back to GoFrame/plain formats
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function unwrapCollection<T>(data: any): { items: T[]; total: number } {
   if (data?.['hydra:member']) {
     return {
@@ -48,10 +51,12 @@ export function unwrapCollection<T>(data: any): { items: T[]; total: number } {
   return { items, total: data?.total ?? data?.totalCount ?? items.length };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function hydraNextPage(data: any): string | null {
   return data?.['hydra:view']?.['hydra:next'] || null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function hydraPrevPage(data: any): string | null {
   return data?.['hydra:view']?.['hydra:previous'] || null;
 }

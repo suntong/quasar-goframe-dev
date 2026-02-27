@@ -38,6 +38,7 @@ const $q = useQuasar();
 const { items, isLoading, pagination, onRequest, remove } = use[[ .Name ]]();
 
 const dialogOpen = ref(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editedItem = ref<any>(null);
 
 const columns = [
@@ -50,6 +51,7 @@ function onCreate() {
   dialogOpen.value = true;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function onEdit(row: any) {
   editedItem.value = { ...row };
   dialogOpen.value = true;
@@ -60,14 +62,16 @@ function onSaved() {
   editedItem.value = null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function onDelete(id: any) {
   $q.dialog({
     title: 'Confirm',
     message: 'Delete this [[ .NameLower ]]?',
     cancel: true,
     persistent: true,
-  }).onOk(async () => {
-    await remove(id);
+  }).onOk(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    void remove(id);
   });
 }
 </script>

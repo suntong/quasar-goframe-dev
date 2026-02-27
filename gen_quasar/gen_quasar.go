@@ -876,7 +876,7 @@ func splitWords(s string) []string {
 
 	runes := []rune(s)
 	for i, r := range runes {
-		if r == '_' || r == '-' || r == ' ' {
+		if r == '_' || r == '-' || r == ' ' || r == '.' {
 			flush()
 			continue
 		}
