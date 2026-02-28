@@ -108,6 +108,8 @@
 
 
 <script setup lang="ts">
+// FormDialog
+
 import { ref, reactive, computed, watch } from 'vue';
 [[ if .HasFileUpload ]]import { useQuasar } from 'quasar';[[ end ]]
 import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
@@ -141,7 +143,7 @@ const props = defineProps<{
   item: any;
 }>();
 
-const emit = defineEmits(['saved', 'cancel']);
+const emit = defineEmits(['saved', 'cancel', 'update:modelValue']);
 
 [[ if .HasFileUpload ]]const $q = useQuasar();[[ end ]]
 const saving = ref(false);

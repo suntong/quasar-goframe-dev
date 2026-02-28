@@ -30,7 +30,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const msg = error.response?.data?.message || error.message;
     console.error('[API]', msg);
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
@@ -66,9 +65,11 @@ export async function fetchRelationOptions(
   }));
 }
 
-// Orval custom mutator: receives a single config object, returns Promise<T>.
-// Unwraps the GoFrame envelope so Orval-generated types match the inner data shape.
-export const customInstance = <T>(config: {
+// Orval custom mutator: supports both (url, options) and (config) patterns.
+// Unwraps the GoFrame envelope so Orval-generated types match inner data.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const customInstance = <T>(
+  urlOrConfig: string | {
   url: string;
   method: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,6 +78,13 @@ export const customInstance = <T>(config: {
   params?: any;
   headers?: Record<string, string>;
   signal?: AbortSignal;
-}): Promise<T> => {
-  return api(config).then((response) => unwrap<T>(response));
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options?: any
+): Promise<T> => {
+  const config = typeof urlOrConfig === 'string'
+    ? { url: urlOrConfig, ...options }
+    : urlOrConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return api(config as any).then((response) => unwrap<T>(response));
 };

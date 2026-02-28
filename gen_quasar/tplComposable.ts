@@ -14,7 +14,13 @@ const QUERY_KEY = '[[ .NamePluralLower ]]';
 export function use[[ .Name ]]() {
   const queryClient = useQueryClient();
 
-  const pagination = ref({
+  const pagination = ref<{
+    page: number;
+    rowsPerPage: number;
+    rowsNumber: number;
+    sortBy: string;
+    descending: boolean;
+  }>({
     page: 1,
     rowsPerPage: 15,
     rowsNumber: 0,
@@ -53,8 +59,8 @@ export function use[[ .Name ]]() {
 
   const items = computed(() => listData.value || []);
 
-  function onRequest(props: { pagination: typeof pagination.value }) {
-    pagination.value = { ...props.pagination };
+  function onRequest(props: { pagination: { page: number; rowsPerPage: number; rowsNumber?: number; sortBy?: string; descending?: boolean } }) {
+    pagination.value = { ...props.pagination, rowsNumber: pagination.value.rowsNumber };
   }
 
   function useItem(id: Ref<string | number>) {

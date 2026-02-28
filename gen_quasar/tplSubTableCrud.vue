@@ -35,7 +35,7 @@
               :key="col.name"
               v-model="form[col.name]"
               :label="col.label"
-              :rules="rules.value[col.name] || []"
+              :rules="(rules || {})[col.name] || []"
               dense
             />
           </q-form>
@@ -50,6 +50,8 @@
 </template>
 
 <script setup lang="ts">
+// SubTableCrud
+
 import { ref, computed } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useQuasar } from 'quasar';
