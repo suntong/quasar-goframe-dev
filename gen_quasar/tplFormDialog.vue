@@ -123,11 +123,22 @@ import { use[[ .Name ]] } from '../../composables/use[[ .Name ]]';
 [[ if .HasPivot ]]
 import PivotSelect from '../../components/PivotSelect.vue';
 [[ end ]]
+[[ if .ZodImportPath ]]
+import type { z } from 'zod';
 
+// Infer form shape from Zod schema for type safety
+type FormShape = z.infer<typeof [[ .CreateSchema ]] >;
+
+// Adjust form data type for JSON string handling in nested objects
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type FormData = FormShape & {
+[[ range .FormFields ]][[ if .IsNestedObject ]]  [[ .JSONName ]]: string;
+[[ end ]][[ end ]]};
+[[ end ]]
 const props = defineProps<{
   modelValue: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  item: any | null;
+  item: any;
 }>();
 
 const emit = defineEmits(['saved', 'cancel']);
@@ -137,12 +148,15 @@ const saving = ref(false);
 
 const isEdit = computed(() => props.item !== null);
 
+// Define validation rules, combining manual and Zod-derived rules
 const rules = computed(() => {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const manualRules = {
     [[ range .FormFields ]]
     [[ .JSONName ]]: [[ .QuasarRules ]],
     [[ end ]]
   };
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   [[ if .ZodImportPath ]]
   const schema = isEdit.value
@@ -159,21 +173,26 @@ const rules = computed(() => {
   return manualRules;
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const emptyForm: Record<string, any> = {
+// Initialize empty form with default values
+[[ if not .ZodImportPath ]]// eslint-disable-next-line @typescript-eslint/no-explicit-any[[ end ]]
+const emptyForm: [[ if .ZodImportPath ]]FormData[[ else ]]Record<string, any>[[ end ]] = {
   [[ range .FormFields ]]
   [[ .JSONName ]]: [[ if .IsPivot ]][][[ else if .IsNestedObject ]]'{}'[[ else if eq .TSType "number" ]]0[[ else if eq .TSType "boolean" ]]false[[ else ]]''[[ end ]],
   [[ end ]]
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const form = reactive<Record<string, any>>({ ...emptyForm });
+[[ if not .ZodImportPath ]]// eslint-disable-next-line @typescript-eslint/no-explicit-any[[ end ]]
+const form = reactive<[[ if .ZodImportPath ]]FormData[[ else ]]Record<string, any>[[ end ]]>({ ...emptyForm });
 
+[[ if .HasRelations ]]
+// Store options for relation fields
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const relationOpts = reactive<Record<string, any[]>>({
 [[ range .FormFields ]][[ if .IsRelation ]]  [[ .JSONName ]]: [],
 [[ end ]][[ end ]]});
+[[ end ]]
 
+// Watch for item changes to populate or reset form
 watch(() => props.item, (val) => {
   if (val) {
     const copy = { ...val };
@@ -217,9 +236,9 @@ function isImageUrl(url: string | null | undefined): boolean {
 }
 [[ end ]]
 
-// Parse JSON-string fields back to objects before sending to the API
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function preparePayload(data: Record<string, any>): Record<string, any> {
+// Prepare form data for API submission by parsing JSON strings
+[[ if not .ZodImportPath ]]// eslint-disable-next-line @typescript-eslint/no-explicit-any[[ end ]]
+function preparePayload(data: [[ if .ZodImportPath ]]FormData[[ else ]]Record<string, any>[[ end ]]): [[ if .ZodImportPath ]]FormShape[[ else ]]Record<string, any>[[ end ]] {
   const out = { ...data };
   for (const [key, val] of Object.entries(out)) {
     if (typeof val === 'string') {
@@ -230,13 +249,14 @@ function preparePayload(data: Record<string, any>): Record<string, any> {
       }
     }
   }
-  return out;
+  return out[[ if .ZodImportPath ]] as FormShape[[ end ]];
 }
 
 const { create, update } = use[[ .Name ]]();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formRef = ref<any>(null);
 
+// Handle form submission for create or update operations
 async function onSubmit() {
   const valid = await formRef.value?.validate();
   if (!valid) return;

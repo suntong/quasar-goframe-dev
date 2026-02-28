@@ -173,6 +173,7 @@ async function onSave() {
   } finally { saving.value = false; }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function onRemove(row: any) {
   $q.dialog({
     title: 'Confirm',
