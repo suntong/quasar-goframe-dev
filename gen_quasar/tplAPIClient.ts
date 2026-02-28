@@ -1,4 +1,4 @@
-// Auto-generated API client — do not edit manually.
+// APIClient Auto-generated API client — do not edit manually.
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 
@@ -68,7 +68,7 @@ export async function fetchRelationOptions(
 
 // Orval custom mutator: receives a single config object, returns Promise<T>.
 // Unwraps the GoFrame envelope so Orval-generated types match the inner data shape.
-const customInstance = <T>(config: {
+export const customInstance = <T>(config: {
   url: string;
   method: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,5 +80,3 @@ const customInstance = <T>(config: {
 }): Promise<T> => {
   return api(config).then((response) => unwrap<T>(response));
 };
-
-export default customInstance;

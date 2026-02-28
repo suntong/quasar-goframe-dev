@@ -1,4 +1,4 @@
-// Auto-generated Orval configuration — do not edit manually.
+// OrvalConfig Auto-generated Orval configuration — do not edit manually.
 // Dual output: Vue Query hooks + TypeScript types, and Zod validation schemas.
 // Run:  npx orval --config ./orval.config.ts
 import { defineConfig } from 'orval';
@@ -16,7 +16,7 @@ export default defineConfig({
       override: {
         mutator: {
           path: './src/api/client.ts',
-          name: 'default',
+          name: 'customInstance',
         },
       },
     },
